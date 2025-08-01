@@ -1,0 +1,25 @@
+/* Justification: Import Bootstrap CSS, which provides a professional and responsive
+   UI framework, addressing the styling and responsiveness issue. */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Justification: Set the root font size and box-sizing for consistent layout. */
+:root {
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* Justification: Apply styles to the body for a clean, full-page layout. */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Justification: Add a margin to the main content area for spacing. */
+main {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
