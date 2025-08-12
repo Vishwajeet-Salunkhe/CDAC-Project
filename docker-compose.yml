@@ -1,0 +1,61 @@
+# Justification: This is a single file to configure and run your multi-container application.
+version: '3.8'
+
+services:
+  mysql:
+    # Justification: Use the official MySQL 8.0 image.
+    image: mysql:8.0
+    container_name: car-service-db
+    # Justification: These environment variables configure the MySQL database.
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: car_service_db
+    # Justification: Map port 3306 on the host to port 3306 in the container.
+    ports:
+      - "3306:3306"
+    # Justification: Use a persistent volume to store database data,
+    # so it's not lost when the container is stopped or removed.
+    volumes:
+      - db-data:/var/lib/mysql
+    # CRITICAL FIX: Add a health check to ensure the database is ready before the backend starts.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    # Justification: This service builds and runs your Spring Boot application.
+    build:
+      context: ./online-car-service-station-backend
+      dockerfile: Dockerfile
+    container_name: car-service-backend
+    # Justification: Map port 8080 on the host to port 8080 in the container.
+    ports:
+      - "8080:8080"
+    # Justification: The backend depends on the MySQL service. This ensures the
+    # MySQL container starts before the backend container.
+    depends_on:
+      mysql:
+        condition: service_healthy # CRITICAL FIX: Wait for the MySQL health check to pass.
+    # Justification: This is the critical fix. It tells the backend how to connect
+    # to the database. The 'mysql' hostname is automatically resolved to the
+    # MySQL container's IP address by Docker Compose.
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/car_service_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+
+  frontend:
+    # Justification: This service builds and runs your React application.
+    build:
+      context: ./online-car-service-station-frontend
+      dockerfile: Dockerfile
+    container_name: car-service-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
